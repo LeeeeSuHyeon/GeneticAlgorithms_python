@@ -55,7 +55,7 @@ def Forward(input, chromosome, hidden_depth, hidden_count, output_count) :
 
 
 
-input = [0, 1]
+input = [1, 0]
 input_count = len(input)
 hidden_depth = 1
 hidden_count = 3
