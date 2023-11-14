@@ -30,33 +30,45 @@ def MakePopulation(population_size, length):
 
 
 # 전방향 계산 수행하는 함수
-def Forward(input, chromosome, hidden_depth, hidden_count, output_count) : 
-    inputs = input 
+def Forward(input, chromosome, hidden_depth, hidden_count, output_count, length):
+    inputs = input
     bias = 1
     sum = []
-    res = 0.0
-    
-    # # 깊이 + 1개의 가중치 배열 분리 
-    # for i in range(hidden_depth):
-    #     chromosome[0] .. chromosome[len(input) * hidden_count - 1] # 6개
-    #     chromosome[-3] .. chromosome[len(chromosome)] # 3개
-    
-    # 입력층과 은닉층 사이의 가중치 계산
-    for i in range(0, hidden_count * 2 -2, 2): 
-        sum.append(input[0] * chromosome[i] + input[1] * chromosome[i+1] + bias)
+
+    # 입력층과 첫 번째 은닉층 사이의 가중치 계산
+    for i in range(0, hidden_count):
+        weighted_sum = bias
+        for k in range(len(inputs)):
+            weighted_sum += inputs[k] * chromosome[len(inputs) * i + k]
+        sum.append(weighted_sum)
+
+    # 추가 은닉층과 출력층 사이의 가중치 계산
+    for i in range(hidden_depth - 1):
+        new_sum = []
+        weight_start = len(inputs) * hidden_count + i * (hidden_count ** 2)
+        for j in range(0, hidden_count):
+            weighted_sum = bias
+            for k in range(0, len(sum)):
+                weighted_sum += sum[k] * chromosome[weight_start+ len(sum) * j + k]
+            new_sum.append(weighted_sum)
+        sum = new_sum
+
+    # 출력층의 가중합 계산 (출력 값이 1개 일 때)
+    weighted_sum = bias
+    new_sum = []
+    ouput_weight = length - hidden_count * output_count
+
+    for j in range(0, len(sum)):
+        weighted_sum += sum[j] * chromosome[ouput_weight + j]
+
+    return round(weighted_sum, 5)
 
 
 
-    # 은닉층과 출력층 사이의 가중치 계산 
-    for j in range(len(sum)) :
-        res += sum[j] * chromosome[(hidden_count * 2) -1 + j]
-    return round(res, 5)
 
-
-
-
-input = [1, 0]
-input_count = len(input)
+inputs = [[0,0], [0,1],[1,0],[1,1]]
+outputs = [0,1,1,0]
+input_count = len(inputs)
 hidden_depth = 1
 hidden_count = 3
 output_count = 1
@@ -75,14 +87,11 @@ chromosomes = MakePopulation(population_size, length)
 # 전방향 계산 출력 
 print("================= Chromosomes After Foward =================")
 for i, chromosome in enumerate(chromosomes):
-    results.append(Forward(input, chromosome, hidden_depth, hidden_count, output_count))
-    
-    print("Chromosome [%d]" %(i))
-    print("forward: %.5f" %(results[i]))
-
-    # MSE 손실함수 계산 
-    err = round((1 - results[i]) ** 2, 5)
-    errs.append(err)
+    for j in range(len(inputs)):
+        results.append(Forward(inputs[j], chromosome, hidden_depth, hidden_count, output_count, length))
+        # MSE 손실함수 계산 
+        err = round((outputs[j] - results[i]) ** 2, 5)
+        errs.append(err)
     print("Error : %.5f " %(err))
     print()
 print("================= Min Error =================")
@@ -193,10 +202,11 @@ errors=[]
 
 # 전방향 계산 출력 
 for i, chromosome in enumerate(chromosomes):
-    results.append(Forward(input, chromosome, hidden_depth, hidden_count, output_count))
-    # MSE 손실함수 계산 
-    err = round((1 - results[i]) ** 2, 5)
-    errs.append(err)
+    for j in range(len(inputs)):
+        results.append(Forward(inputs[j], chromosome, hidden_depth, hidden_count, output_count, length))
+        # MSE 손실함수 계산 
+        err = round((outputs[j] - results[i]) ** 2, 5)
+        errs.append(err)
 errors = errs # 기본 에러 배열 
 
 print("================= Chromosomes After GA  =================")
@@ -281,10 +291,11 @@ for G in range(10):
 
     # 전방향 계산 출력 
     for i, chromosome in enumerate(chromosomes):
-        results.append(Forward(input, chromosome, hidden_depth, hidden_count, output_count))
-        # MSE 손실함수 계산 
-        err = round((1 - results[i]) ** 2, 5)
-        errs.append(err)
+        for j in range(len(inputs)):
+            results.append(Forward(inputs[j], chromosome, hidden_depth, hidden_count, output_count, length))
+            # MSE 손실함수 계산 
+            err = round((outputs[j] - results[i]) ** 2, 5)
+            errs.append(err)
     errors = errs # 기본 에러 배열 
 
     sort = sorted(errs)
