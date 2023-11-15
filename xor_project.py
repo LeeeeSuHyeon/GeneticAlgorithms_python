@@ -107,6 +107,7 @@ print()
 # Selection
 print("================= GA 학습 시작 =================")
 print()
+
 select_count = 4
 if (select_count % 2 != 0):
   select_count -= 1
@@ -119,7 +120,7 @@ random_index = ((random.sample(list(range(population_size)), select_count*2)))
 
 print()
 
-t = 0.7
+t = 0.5
 for j in range(0, len(random_index), 2):
   f = random.random()
   p1 = random_index[j]
@@ -309,3 +310,5 @@ for G in range(10):
 
 
 
+parents1 = [0.1, 0.3, -0.22]
+parents2 = [0.5, -0.1, -0.51]
